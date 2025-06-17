@@ -1,4 +1,3 @@
-
 <?php
 // Only start session if not already started (for standalone access)
 if (session_status() === PHP_SESSION_NONE) {
@@ -195,7 +194,9 @@ if (!$is_included): ?>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-4">
                         <div>
-                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Account Status</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Account Status
+                            </label>
                             <div class="mt-1 flex items-center">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                     <i class="fas fa-check-circle mr-1"></i>
@@ -204,13 +205,17 @@ if (!$is_included): ?>
                             </div>
                         </div>
                         <div>
-                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Account Type</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Account Type
+                            </label>
                             <div class="mt-1">
                                 <span class="text-blue-600 dark:text-blue-400 font-medium">Free Account</span>
                             </div>
                         </div>
                         <div>
-                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Account Age</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Account Age
+                            </label>
                             <div class="mt-1">
                                 <span class="font-medium text-gray-900 dark:text-white"><?= $account_age_days ?> days</span>
                             </div>
@@ -218,13 +223,17 @@ if (!$is_included): ?>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">User ID</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                User ID
+                            </label>
                             <div class="mt-1">
                                 <span class="font-mono text-sm text-gray-800 dark:text-gray-200"><?= htmlspecialchars($user['id']) ?></span>
                             </div>
                         </div>
                         <div>
-                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Website</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Website
+                            </label>
                             <div class="mt-1">
                                 <?php if ($user['website']): ?>
                                     <a href="<?= htmlspecialchars($user['website']) ?>" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
@@ -236,7 +245,9 @@ if (!$is_included): ?>
                             </div>
                         </div>
                         <div>
-                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Most Used Language</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Most Used Language
+                            </label>
                             <div class="mt-1">
                                 <span class="font-medium text-gray-900 dark:text-white"><?= $top_language ? htmlspecialchars($top_language['language']) : 'None' ?></span>
                             </div>
