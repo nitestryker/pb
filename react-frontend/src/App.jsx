@@ -14,6 +14,7 @@ import NotificationsPage from './pages/NotificationsPage'
 import MessagesPage from './pages/MessagesPage'
 import ProfilePage from './pages/ProfilePage'
 import EditProfilePage from './pages/EditProfilePage'
+import PricingPage from './pages/PricingPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { UserProvider, useUser } from './contexts/UserContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -80,6 +81,7 @@ function App() {
                     <EditProfilePage />
                   </ProtectedRoute>
                 } />
+                <Route path="/pricing" element={<PricingPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </main>
