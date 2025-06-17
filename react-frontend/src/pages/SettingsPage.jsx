@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { updateUserSettings } from '../utils/api';
 
 const SettingsPage = () => {
   const { user } = useUser();
@@ -9,32 +10,43 @@ const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('security');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
   // Form states
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
   });
   
   const [preferencesForm, setPreferencesForm] = useState({
-    themePreference: theme,
-    emailNotifications: true,
-    defaultPasteExpiry: '604800',
-    defaultPastePublic: true,
+    theme_preference: theme,
+    email_notifications: true,
+    default_paste_expiry: '604800',
+    default_paste_public: true,
     timezone: 'UTC'
   });
   
   const [privacyForm, setPrivacyForm] = useState({
-    profileVisibility: 'public',
-    showPasteCount: true,
-    allowMessages: true
+    profile_visibility: 'public',
+    show_paste_count: true,
+    allow_messages: true
   });
   
   // Redirect if not logged in
   if (!user) {
     return <Navigate to="/login" state={{ from: { pathname: '/settings' } }} />;
   }
+  
+  // Load user settings on initial render
+  useEffect(() => {
+    // In a real app, you would fetch the user's settings from the backend
+    // For now, we'll use default values
+    setPreferencesForm(prev => ({
+      ...prev,
+      theme_preference: theme
+    }));
+  }, [theme]);
   
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -52,7 +64,7 @@ const SettingsPage = () => {
     }));
     
     // Apply theme change immediately
-    if (name === 'themePreference') {
+    if (name === 'theme_preference') {
       setTheme(value);
     }
   };
@@ -69,37 +81,36 @@ const SettingsPage = () => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
+    setIsLoading(true);
     
     try {
       // Validate passwords
-      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      if (passwordForm.new_password !== passwordForm.confirm_password) {
         throw new Error('New passwords do not match');
       }
       
-      if (passwordForm.newPassword.length < 6) {
+      if (passwordForm.new_password.length < 6) {
         throw new Error('New password must be at least 6 characters long');
       }
       
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate a successful password change
+      // Send the password update request to the backend
+      const response = await updateUserSettings('password', passwordForm);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, only accept "currentpassword" as the current password
-      if (passwordForm.currentPassword !== 'currentpassword') {
-        throw new Error('Current password is incorrect');
+      if (response.success) {
+        setSuccessMessage('Password updated successfully!');
+        setPasswordForm({
+          current_password: '',
+          new_password: '',
+          confirm_password: ''
+        });
+      } else {
+        throw new Error(response.message || 'Failed to update password');
       }
-      
-      setSuccessMessage('Password updated successfully!');
-      setPasswordForm({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
     } catch (err) {
       console.error('Password update error:', err);
       setErrorMessage(err.message || 'Failed to update password. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -107,18 +118,22 @@ const SettingsPage = () => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
+    setIsLoading(true);
     
     try {
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate a successful preferences update
+      // Send the preferences update request to the backend
+      const response = await updateUserSettings('preferences', preferencesForm);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSuccessMessage('Preferences updated successfully!');
+      if (response.success) {
+        setSuccessMessage('Preferences updated successfully!');
+      } else {
+        throw new Error(response.message || 'Failed to update preferences');
+      }
     } catch (err) {
       console.error('Preferences update error:', err);
       setErrorMessage(err.message || 'Failed to update preferences. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -126,18 +141,22 @@ const SettingsPage = () => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
+    setIsLoading(true);
     
     try {
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate a successful privacy settings update
+      // Send the privacy settings update request to the backend
+      const response = await updateUserSettings('privacy', privacyForm);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSuccessMessage('Privacy settings updated successfully!');
+      if (response.success) {
+        setSuccessMessage('Privacy settings updated successfully!');
+      } else {
+        throw new Error(response.message || 'Failed to update privacy settings');
+      }
     } catch (err) {
       console.error('Privacy settings update error:', err);
       setErrorMessage(err.message || 'Failed to update privacy settings. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -217,8 +236,8 @@ const SettingsPage = () => {
                 <label className="block text-sm font-medium mb-2">Current Password</label>
                 <input 
                   type="password" 
-                  name="currentPassword" 
-                  value={passwordForm.currentPassword}
+                  name="current_password" 
+                  value={passwordForm.current_password}
                   onChange={handlePasswordChange}
                   required 
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-600 focus:ring-2 focus:ring-blue-500"
@@ -229,8 +248,8 @@ const SettingsPage = () => {
                 <label className="block text-sm font-medium mb-2">New Password</label>
                 <input 
                   type="password" 
-                  name="newPassword" 
-                  value={passwordForm.newPassword}
+                  name="new_password" 
+                  value={passwordForm.new_password}
                   onChange={handlePasswordChange}
                   required 
                   minLength="6"
@@ -243,8 +262,8 @@ const SettingsPage = () => {
                 <label className="block text-sm font-medium mb-2">Confirm New Password</label>
                 <input 
                   type="password" 
-                  name="confirmPassword" 
-                  value={passwordForm.confirmPassword}
+                  name="confirm_password" 
+                  value={passwordForm.confirm_password}
                   onChange={handlePasswordChange}
                   required 
                   minLength="6"
@@ -252,8 +271,22 @@ const SettingsPage = () => {
                 />
               </div>
 
-              <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                <i className="fas fa-save mr-2"></i>Update Password
+              <button 
+                type="submit" 
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-save mr-2"></i>
+                    Update Password
+                  </>
+                )}
               </button>
             </form>
           </div>
@@ -275,7 +308,7 @@ const SettingsPage = () => {
               </div>
               <div>
                 <span className="font-medium text-gray-600 dark:text-gray-400">Member Since:</span>
-                <span className="ml-2">{accountCreatedDate.toLocaleDateString()}</span>
+                <span className="ml-2">{new Date(user.created_at * 1000).toLocaleDateString()}</span>
               </div>
               <div>
                 <span className="font-medium text-gray-600 dark:text-gray-400">User ID:</span>
@@ -301,8 +334,8 @@ const SettingsPage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-2">Preferred Theme</label>
                   <select 
-                    name="themePreference" 
-                    value={preferencesForm.themePreference}
+                    name="theme_preference" 
+                    value={preferencesForm.theme_preference}
                     onChange={handlePreferencesChange}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-600"
                   >
@@ -345,8 +378,8 @@ const SettingsPage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-2">Default Paste Expiry</label>
                   <select 
-                    name="defaultPasteExpiry" 
-                    value={preferencesForm.defaultPasteExpiry}
+                    name="default_paste_expiry" 
+                    value={preferencesForm.default_paste_expiry}
                     onChange={handlePreferencesChange}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-600"
                   >
@@ -362,8 +395,8 @@ const SettingsPage = () => {
                   <label className="flex items-center space-x-2">
                     <input 
                       type="checkbox" 
-                      name="defaultPastePublic" 
-                      checked={preferencesForm.defaultPastePublic}
+                      name="default_paste_public" 
+                      checked={preferencesForm.default_paste_public}
                       onChange={handlePreferencesChange}
                       className="rounded"
                     />
@@ -384,8 +417,8 @@ const SettingsPage = () => {
                 <label className="flex items-center space-x-2">
                   <input 
                     type="checkbox" 
-                    name="emailNotifications" 
-                    checked={preferencesForm.emailNotifications}
+                    name="email_notifications" 
+                    checked={preferencesForm.email_notifications}
                     onChange={handlePreferencesChange}
                     className="rounded"
                   />
@@ -394,8 +427,22 @@ const SettingsPage = () => {
               </div>
             </div>
 
-            <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-              <i className="fas fa-save mr-2"></i>Save Preferences
+            <button 
+              type="submit" 
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save Preferences
+                </>
+              )}
             </button>
           </form>
         </div>
@@ -416,8 +463,8 @@ const SettingsPage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-2">Profile Visibility</label>
                   <select 
-                    name="profileVisibility" 
-                    value={privacyForm.profileVisibility}
+                    name="profile_visibility" 
+                    value={privacyForm.profile_visibility}
                     onChange={handlePrivacyChange}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-600"
                   >
@@ -432,8 +479,8 @@ const SettingsPage = () => {
                   <label className="flex items-center space-x-2">
                     <input 
                       type="checkbox" 
-                      name="showPasteCount" 
-                      checked={privacyForm.showPasteCount}
+                      name="show_paste_count" 
+                      checked={privacyForm.show_paste_count}
                       onChange={handlePrivacyChange}
                       className="rounded"
                     />
@@ -445,8 +492,8 @@ const SettingsPage = () => {
                   <label className="flex items-center space-x-2">
                     <input 
                       type="checkbox" 
-                      name="allowMessages" 
-                      checked={privacyForm.allowMessages}
+                      name="allow_messages" 
+                      checked={privacyForm.allow_messages}
                       onChange={handlePrivacyChange}
                       className="rounded"
                     />
@@ -456,8 +503,22 @@ const SettingsPage = () => {
               </div>
             </div>
 
-            <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-              <i className="fas fa-save mr-2"></i>Save Privacy Settings
+            <button 
+              type="submit" 
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save Privacy Settings
+                </>
+              )}
             </button>
           </form>
         </div>

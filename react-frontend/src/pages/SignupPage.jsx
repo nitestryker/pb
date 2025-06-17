@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { register } from '../utils/api';
 
 const SignupPage = () => {
   const { login } = useUser();
@@ -9,8 +10,8 @@ const SignupPage = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    agreeTerms: false
+    confirm_password: '',
+    agree_terms: false
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,37 +31,26 @@ const SignupPage = () => {
     
     try {
       // Validate form data
-      if (!formData.username.trim() || !formData.email.trim() || !formData.password) {
-        throw new Error('Please fill in all required fields');
-      }
-      
-      if (formData.password !== formData.confirmPassword) {
+      if (formData.password !== formData.confirm_password) {
         throw new Error('Passwords do not match');
       }
       
-      if (!formData.agreeTerms) {
+      if (!formData.agree_terms) {
         throw new Error('You must agree to the terms and conditions');
       }
       
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate a successful registration
+      // Send registration request to the backend
+      const response = await register(formData);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Create mock user data
-      const userData = {
-        id: 'user' + Date.now(),
-        username: formData.username,
-        email: formData.email,
-        profileImage: null
-      };
-      
-      // Call login function from context
-      login(userData);
-      
-      // Redirect to home page
-      navigate('/');
+      if (response.success) {
+        // Update user context with the returned user data
+        login(response.user);
+        
+        // Redirect to home page
+        navigate('/');
+      } else {
+        throw new Error(response.message || 'Registration failed');
+      }
     } catch (err) {
       console.error('Signup error:', err);
       setError(err.message || 'Failed to create account. Please try again.');
@@ -142,14 +132,14 @@ const SignupPage = () => {
           </div>
           
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+            <label htmlFor="confirm_password" className="block text-sm font-medium mb-2">
               Confirm Password <span className="text-red-500">*</span>
             </label>
             <input 
               type="password" 
-              id="confirmPassword" 
-              name="confirmPassword" 
-              value={formData.confirmPassword} 
+              id="confirm_password" 
+              name="confirm_password" 
+              value={formData.confirm_password} 
               onChange={handleChange} 
               required
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500"
@@ -160,14 +150,14 @@ const SignupPage = () => {
           <div className="flex items-start">
             <input 
               type="checkbox" 
-              id="agreeTerms" 
-              name="agreeTerms" 
-              checked={formData.agreeTerms} 
+              id="agree_terms" 
+              name="agree_terms" 
+              checked={formData.agree_terms} 
               onChange={handleChange} 
               required
               className="mt-1 mr-2"
             />
-            <label htmlFor="agreeTerms" className="text-sm">
+            <label htmlFor="agree_terms" className="text-sm">
               I agree to the{' '}
               <Link to="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Terms of Service

@@ -1,52 +1,22 @@
 import { useState, useEffect } from 'react';
 import PasteForm from '../components/PasteForm';
 import PasteCard from '../components/PasteCard';
+import { getRecentPastes } from '../utils/api';
 
 const HomePage = () => {
   const [recentPastes, setRecentPastes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchRecentPastes = async () => {
       try {
-        // In a real app, this would be a fetch call to your backend
-        // For now, we'll use mock data
-        const mockPastes = [
-          {
-            id: 1,
-            title: 'React Hooks Example',
-            content: 'import { useState, useEffect } from "react";\n\nfunction Example() {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    document.title = `You clicked ${count} times`;\n  });\n\n  return (\n    <div>\n      <p>You clicked {count} times</p>\n      <button onClick={() => setCount(count + 1)}>\n        Click me\n      </button>\n    </div>\n  );\n}',
-            language: 'javascript',
-            created_at: Math.floor(Date.now() / 1000) - 3600,
-            views: 42,
-            username: 'reactdev'
-          },
-          {
-            id: 2,
-            title: 'Python List Comprehension',
-            content: 'numbers = [1, 2, 3, 4, 5]\n\n# Using list comprehension\nsquares = [x**2 for x in numbers]\nprint(squares)  # Output: [1, 4, 9, 16, 25]\n\n# Equivalent to:\nsquares = []\nfor x in numbers:\n    squares.append(x**2)',
-            language: 'python',
-            created_at: Math.floor(Date.now() / 1000) - 7200,
-            views: 28,
-            username: 'pythonista'
-          },
-          {
-            id: 3,
-            title: 'CSS Flexbox Cheatsheet',
-            content: '.container {\n  display: flex;\n  flex-direction: row | row-reverse | column | column-reverse;\n  flex-wrap: nowrap | wrap | wrap-reverse;\n  justify-content: flex-start | flex-end | center | space-between | space-around | space-evenly;\n  align-items: stretch | flex-start | flex-end | center | baseline;\n  align-content: flex-start | flex-end | center | space-between | space-around | stretch;\n}',
-            language: 'css',
-            created_at: Math.floor(Date.now() / 1000) - 14400,
-            views: 65,
-            username: 'cssmaster'
-          }
-        ];
-        
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setRecentPastes(mockPastes);
+        setIsLoading(true);
+        const response = await getRecentPastes(5);
+        setRecentPastes(response.pastes || []);
       } catch (error) {
         console.error('Error fetching recent pastes:', error);
+        setError('Failed to load recent pastes');
       } finally {
         setIsLoading(false);
       }
@@ -78,6 +48,11 @@ const HomePage = () => {
                     <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
                   </div>
                 ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-6">
+                <i className="fas fa-exclamation-circle text-4xl text-red-500 mb-3"></i>
+                <p className="text-gray-500 dark:text-gray-400">{error}</p>
               </div>
             ) : recentPastes.length === 0 ? (
               <div className="text-center py-6">

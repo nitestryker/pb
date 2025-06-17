@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { login as apiLogin } from '../utils/api';
 
 const LoginPage = () => {
   const { login } = useUser();
@@ -9,7 +10,7 @@ const LoginPage = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    rememberMe: false
+    remember: false
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,35 +32,18 @@ const LoginPage = () => {
     setError('');
     
     try {
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate a successful login
+      // Send login request to the backend
+      const response = await apiLogin(formData);
       
-      // Validate form data
-      if (!formData.username.trim() || !formData.password) {
-        throw new Error('Please enter both username and password');
+      if (response.success) {
+        // Update user context with the returned user data
+        login(response.user);
+        
+        // Redirect to the page the user was trying to access, or home
+        navigate(from, { replace: true });
+      } else {
+        throw new Error(response.message || 'Invalid username or password');
       }
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, accept any login with password "password"
-      if (formData.password !== 'password') {
-        throw new Error('Invalid username or password');
-      }
-      
-      // Create mock user data
-      const userData = {
-        id: 'user123',
-        username: formData.username,
-        email: `${formData.username}@example.com`,
-        profileImage: null
-      };
-      
-      // Call login function from context
-      login(userData);
-      
-      // Redirect to the page the user was trying to access, or home
-      navigate(from, { replace: true });
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to login. Please try again.');
@@ -124,8 +108,8 @@ const LoginPage = () => {
             <label className="flex items-center">
               <input 
                 type="checkbox" 
-                name="rememberMe" 
-                checked={formData.rememberMe} 
+                name="remember" 
+                checked={formData.remember} 
                 onChange={handleChange} 
                 className="mr-2"
               />

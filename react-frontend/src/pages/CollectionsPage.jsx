@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { getUserCollections, createCollection } from '../utils/api';
 
 const CollectionsPage = () => {
   const { user } = useUser();
@@ -11,8 +12,9 @@ const CollectionsPage = () => {
   const [newCollection, setNewCollection] = useState({
     name: '',
     description: '',
-    isPublic: true
+    is_public: true
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if not logged in
   if (!user) {
@@ -25,41 +27,13 @@ const CollectionsPage = () => {
       setError('');
       
       try {
-        // In a real app, this would be a fetch call to your backend
-        // For now, we'll use mock data
+        const response = await getUserCollections();
         
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Mock collections data
-        const mockCollections = [
-          {
-            id: 1,
-            name: 'JavaScript Snippets',
-            description: 'Useful JavaScript code snippets and examples',
-            is_public: true,
-            created_at: Math.floor(Date.now() / 1000) - 604800,
-            paste_count: 12
-          },
-          {
-            id: 2,
-            name: 'CSS Tricks',
-            description: 'CSS tricks and techniques for modern web design',
-            is_public: true,
-            created_at: Math.floor(Date.now() / 1000) - 1209600,
-            paste_count: 8
-          },
-          {
-            id: 3,
-            name: 'React Components',
-            description: 'Reusable React components and hooks',
-            is_public: false,
-            created_at: Math.floor(Date.now() / 1000) - 2592000,
-            paste_count: 15
-          }
-        ];
-        
-        setCollections(mockCollections);
+        if (response.success) {
+          setCollections(response.collections || []);
+        } else {
+          throw new Error(response.message || 'Failed to load collections');
+        }
       } catch (err) {
         console.error('Error fetching collections:', err);
         setError('Failed to load collections. Please try again later.');
@@ -75,42 +49,37 @@ const CollectionsPage = () => {
     e.preventDefault();
     
     try {
+      setIsSubmitting(true);
+      
       // Validate form data
       if (!newCollection.name.trim()) {
         throw new Error('Collection name is required');
       }
       
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate creating a collection
+      // Send the collection data to the backend
+      const response = await createCollection(newCollection);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Create a new collection object
-      const newCollectionObj = {
-        id: Date.now(),
-        name: newCollection.name,
-        description: newCollection.description,
-        is_public: newCollection.isPublic,
-        created_at: Math.floor(Date.now() / 1000),
-        paste_count: 0
-      };
-      
-      // Add to collections
-      setCollections([newCollectionObj, ...collections]);
-      
-      // Reset form
-      setNewCollection({
-        name: '',
-        description: '',
-        isPublic: true
-      });
-      
-      // Hide form
-      setShowCreateForm(false);
+      if (response.success) {
+        // Add the new collection to the list
+        setCollections([response.collection, ...collections]);
+        
+        // Reset form
+        setNewCollection({
+          name: '',
+          description: '',
+          is_public: true
+        });
+        
+        // Hide form
+        setShowCreateForm(false);
+      } else {
+        throw new Error(response.message || 'Failed to create collection');
+      }
     } catch (err) {
       console.error('Error creating collection:', err);
       setError(err.message || 'Failed to create collection. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -188,8 +157,8 @@ const CollectionsPage = () => {
                 <label className="flex items-center space-x-2">
                   <input 
                     type="checkbox" 
-                    name="isPublic" 
-                    checked={newCollection.isPublic} 
+                    name="is_public" 
+                    checked={newCollection.is_public} 
                     onChange={handleInputChange} 
                     className="rounded"
                   />
@@ -204,9 +173,19 @@ const CollectionsPage = () => {
                 <button 
                   type="submit" 
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  disabled={isSubmitting}
                 >
-                  <i className="fas fa-folder-plus mr-2"></i>
-                  Create Collection
+                  {isSubmitting ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-folder-plus mr-2"></i>
+                      Create Collection
+                    </>
+                  )}
                 </button>
                 <button 
                   type="button" 

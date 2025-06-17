@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
@@ -11,8 +11,25 @@ import AccountPage from './pages/AccountPage'
 import SettingsPage from './pages/SettingsPage'
 import CollectionsPage from './pages/CollectionsPage'
 import NotFoundPage from './pages/NotFoundPage'
-import { UserProvider } from './contexts/UserContext'
+import { UserProvider, useUser } from './contexts/UserContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+
+// Protected route component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useUser();
+  
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  
+  return children;
+};
 
 function App() {
   return (
@@ -28,9 +45,21 @@ function App() {
                 <Route path="/view/:id" element={<ViewPastePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                <Route path="/account" element={<AccountPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/collections" element={<CollectionsPage />} />
+                <Route path="/account" element={
+                  <ProtectedRoute>
+                    <AccountPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/collections" element={
+                  <ProtectedRoute>
+                    <CollectionsPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </main>

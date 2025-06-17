@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -52,7 +52,7 @@ const PasteView = ({ paste }) => {
                   {paste.language}
                 </span>
               )}
-              {paste.user_id && (
+              {paste.username && (
                 <span>
                   <i className="fas fa-user mr-1"></i>
                   <Link to={`/profile/${paste.username}`} className="hover:text-blue-500">
@@ -71,20 +71,22 @@ const PasteView = ({ paste }) => {
               <i className={`fas ${copied ? 'fa-check' : 'fa-copy'} mr-2`}></i>
               {copied ? 'Copied!' : 'Copy'}
             </button>
-            <Link 
-              to={`/raw/${paste.id}`}
+            <a 
+              href={`/?id=${paste.id}&raw=1`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm flex items-center"
             >
               <i className="fas fa-code mr-2"></i>
               Raw
-            </Link>
-            <Link 
-              to={`/download/${paste.id}`}
+            </a>
+            <a 
+              href={`/?id=${paste.id}&download=1`}
               className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm flex items-center"
             >
               <i className="fas fa-download mr-2"></i>
               Download
-            </Link>
+            </a>
             <button 
               className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm flex items-center"
             >

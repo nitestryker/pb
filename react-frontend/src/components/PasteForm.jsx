@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { createPaste } from '../utils/api';
 
 const PasteForm = () => {
   const { user } = useUser();
@@ -9,12 +10,12 @@ const PasteForm = () => {
     title: '',
     content: '',
     language: 'plaintext',
-    expiry: '604800', // 1 week default
-    isPublic: true,
+    expire_time: '604800', // 1 week default
+    is_public: true,
     password: '',
     tags: '',
-    burnAfterRead: false,
-    zeroKnowledge: false
+    burn_after_read: false,
+    zero_knowledge: false
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,21 +34,18 @@ const PasteForm = () => {
     setError('');
 
     try {
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate a successful paste creation
-      console.log('Submitting paste:', formData);
+      // Send the paste data to the backend
+      const response = await createPaste(formData);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate successful paste creation with a random ID
-      const pasteId = Math.floor(Math.random() * 1000);
-      
-      // Redirect to the paste view page
-      navigate(`/view/${pasteId}`);
+      if (response.success) {
+        // Redirect to the paste view page
+        navigate(`/view/${response.paste_id}`);
+      } else {
+        throw new Error(response.message || 'Failed to create paste');
+      }
     } catch (err) {
       console.error('Error creating paste:', err);
-      setError('Failed to create paste. Please try again.');
+      setError(err.message || 'Failed to create paste. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -118,8 +116,8 @@ const PasteForm = () => {
           <div>
             <label className="block text-sm font-medium mb-2">Expiration</label>
             <select 
-              name="expiry" 
-              value={formData.expiry} 
+              name="expire_time" 
+              value={formData.expire_time} 
               onChange={handleChange} 
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700"
             >
@@ -163,37 +161,37 @@ const PasteForm = () => {
           <div className="flex items-center">
             <input 
               type="checkbox" 
-              id="isPublic" 
-              name="isPublic" 
-              checked={formData.isPublic} 
+              id="is_public" 
+              name="is_public" 
+              checked={formData.is_public} 
               onChange={handleChange} 
               className="mr-2"
             />
-            <label htmlFor="isPublic">Public paste (visible in archive and search)</label>
+            <label htmlFor="is_public">Public paste (visible in archive and search)</label>
           </div>
 
           <div className="flex items-center">
             <input 
               type="checkbox" 
-              id="burnAfterRead" 
-              name="burnAfterRead" 
-              checked={formData.burnAfterRead} 
+              id="burn_after_read" 
+              name="burn_after_read" 
+              checked={formData.burn_after_read} 
               onChange={handleChange} 
               className="mr-2"
             />
-            <label htmlFor="burnAfterRead">Burn after read (delete after first view)</label>
+            <label htmlFor="burn_after_read">Burn after read (delete after first view)</label>
           </div>
 
           <div className="flex items-center">
             <input 
               type="checkbox" 
-              id="zeroKnowledge" 
-              name="zeroKnowledge" 
-              checked={formData.zeroKnowledge} 
+              id="zero_knowledge" 
+              name="zero_knowledge" 
+              checked={formData.zero_knowledge} 
               onChange={handleChange} 
               className="mr-2"
             />
-            <label htmlFor="zeroKnowledge">Zero knowledge (encrypted in browser)</label>
+            <label htmlFor="zero_knowledge">Zero knowledge (encrypted in browser)</label>
           </div>
         </div>
 

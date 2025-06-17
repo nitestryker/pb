@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import PasteCard from '../components/PasteCard';
+import { getArchivePastes } from '../utils/api';
 
 const ArchivePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,7 +15,7 @@ const ArchivePage = () => {
   });
   
   // Get filter values from URL params
-  const currentPage = parseInt(searchParams.get('page') || '1');
+  const currentPage = parseInt(searchParams.get('p') || '1');
   const language = searchParams.get('language') || '';
   const tag = searchParams.get('tag') || '';
   const search = searchParams.get('search') || '';
@@ -27,114 +28,26 @@ const ArchivePage = () => {
       setError('');
       
       try {
-        // In a real app, this would be a fetch call to your backend
-        // For now, we'll use mock data
-        
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Mock pastes data
-        const mockPastes = [
-          {
-            id: 1,
-            title: 'React Hooks Example',
-            content: 'import { useState, useEffect } from "react";\n\nfunction Example() {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    document.title = `You clicked ${count} times`;\n  });\n\n  return (\n    <div>\n      <p>You clicked {count} times</p>\n      <button onClick={() => setCount(count + 1)}>\n        Click me\n      </button>\n    </div>\n  );\n}',
-            language: 'javascript',
-            created_at: Math.floor(Date.now() / 1000) - 3600,
-            views: 42,
-            username: 'reactdev',
-            tags: 'react, hooks, javascript'
-          },
-          {
-            id: 2,
-            title: 'Python List Comprehension',
-            content: 'numbers = [1, 2, 3, 4, 5]\n\n# Using list comprehension\nsquares = [x**2 for x in numbers]\nprint(squares)  # Output: [1, 4, 9, 16, 25]\n\n# Equivalent to:\nsquares = []\nfor x in numbers:\n    squares.append(x**2)',
-            language: 'python',
-            created_at: Math.floor(Date.now() / 1000) - 7200,
-            views: 28,
-            username: 'pythonista',
-            tags: 'python, list, comprehension'
-          },
-          {
-            id: 3,
-            title: 'CSS Flexbox Cheatsheet',
-            content: '.container {\n  display: flex;\n  flex-direction: row | row-reverse | column | column-reverse;\n  flex-wrap: nowrap | wrap | wrap-reverse;\n  justify-content: flex-start | flex-end | center | space-between | space-around | space-evenly;\n  align-items: stretch | flex-start | flex-end | center | baseline;\n  align-content: flex-start | flex-end | center | space-between | space-around | stretch;\n}',
-            language: 'css',
-            created_at: Math.floor(Date.now() / 1000) - 14400,
-            views: 65,
-            username: 'cssmaster',
-            tags: 'css, flexbox, layout'
-          },
-          {
-            id: 4,
-            title: 'PHP PDO Database Connection',
-            content: '<?php\ntry {\n    $db = new PDO(\'sqlite:database.sqlite\');\n    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);\n    \n    $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");\n    $stmt->execute([1]);\n    $user = $stmt->fetch(PDO::FETCH_ASSOC);\n    \n    print_r($user);\n} catch (PDOException $e) {\n    echo "Database error: " . $e->getMessage();\n}',
-            language: 'php',
-            created_at: Math.floor(Date.now() / 1000) - 28800,
-            views: 37,
-            username: 'phpdev',
-            tags: 'php, database, pdo'
-          },
-          {
-            id: 5,
-            title: 'Java Stream API Example',
-            content: 'import java.util.Arrays;\nimport java.util.List;\nimport java.util.stream.Collectors;\n\npublic class StreamExample {\n    public static void main(String[] args) {\n        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);\n        \n        List<Integer> evenSquares = numbers.stream()\n            .filter(n -> n % 2 == 0)\n            .map(n -> n * n)\n            .collect(Collectors.toList());\n        \n        System.out.println(evenSquares); // [4, 16, 36, 64, 100]\n    }\n}',
-            language: 'java',
-            created_at: Math.floor(Date.now() / 1000) - 43200,
-            views: 51,
-            username: 'javadev',
-            tags: 'java, stream, functional'
-          }
-        ];
-        
-        // Filter pastes based on search params
-        let filteredPastes = [...mockPastes];
-        
-        if (language) {
-          filteredPastes = filteredPastes.filter(paste => 
-            paste.language.toLowerCase() === language.toLowerCase()
-          );
-        }
-        
-        if (tag) {
-          filteredPastes = filteredPastes.filter(paste => 
-            paste.tags && paste.tags.toLowerCase().includes(tag.toLowerCase())
-          );
-        }
-        
-        if (search) {
-          filteredPastes = filteredPastes.filter(paste => 
-            paste.title.toLowerCase().includes(search.toLowerCase()) || 
-            paste.content.toLowerCase().includes(search.toLowerCase())
-          );
-        }
-        
-        // Sort pastes
-        filteredPastes.sort((a, b) => {
-          if (sortBy === 'date') {
-            return order === 'desc' ? b.created_at - a.created_at : a.created_at - b.created_at;
-          } else if (sortBy === 'views') {
-            return order === 'desc' ? b.views - a.views : a.views - b.views;
-          }
-          return 0;
+        // Fetch pastes from the backend with filters
+        const response = await getArchivePastes({
+          p: currentPage,
+          language,
+          tag,
+          search,
+          sort: sortBy,
+          order
         });
         
-        // Pagination
-        const itemsPerPage = 10;
-        const totalItems = filteredPastes.length;
-        const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-        const validPage = Math.min(Math.max(1, currentPage), totalPages);
-        
-        const startIndex = (validPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedPastes = filteredPastes.slice(startIndex, endIndex);
-        
-        setPastes(paginatedPastes);
-        setPagination({
-          currentPage: validPage,
-          totalPages,
-          totalItems
-        });
+        if (response.success) {
+          setPastes(response.pastes || []);
+          setPagination({
+            currentPage: response.pagination?.current_page || 1,
+            totalPages: response.pagination?.total_pages || 1,
+            totalItems: response.pagination?.total_items || 0
+          });
+        } else {
+          throw new Error(response.message || 'Failed to load pastes');
+        }
       } catch (err) {
         console.error('Error fetching pastes:', err);
         setError('Failed to load pastes. Please try again later.');
@@ -147,7 +60,7 @@ const ArchivePage = () => {
   }, [currentPage, language, tag, search, sortBy, order]);
 
   const handlePageChange = (newPage) => {
-    searchParams.set('page', newPage.toString());
+    searchParams.set('p', newPage.toString());
     setSearchParams(searchParams);
   };
 
@@ -158,7 +71,7 @@ const ArchivePage = () => {
     } else {
       searchParams.delete(name);
     }
-    searchParams.delete('page'); // Reset to page 1 when filters change
+    searchParams.delete('p'); // Reset to page 1 when filters change
     setSearchParams(searchParams);
   };
 
@@ -172,7 +85,7 @@ const ArchivePage = () => {
     } else {
       searchParams.delete('search');
     }
-    searchParams.delete('page'); // Reset to page 1 when search changes
+    searchParams.delete('p'); // Reset to page 1 when search changes
     setSearchParams(searchParams);
   };
 

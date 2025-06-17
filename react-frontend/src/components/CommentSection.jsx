@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { addComment } from '../utils/api';
 
 const CommentSection = ({ pasteId, comments: initialComments = [] }) => {
   const { user } = useUser();
@@ -17,25 +18,20 @@ const CommentSection = ({ pasteId, comments: initialComments = [] }) => {
     setError('');
     
     try {
-      // In a real app, this would be a fetch call to your backend
-      // For now, we'll simulate adding a comment
-      const newCommentObj = {
-        id: Date.now(),
-        paste_id: pasteId,
-        user_id: user?.id,
-        username: user?.username,
-        content: newComment,
-        created_at: Math.floor(Date.now() / 1000)
-      };
+      // Send the comment to the backend
+      const response = await addComment(pasteId, newComment);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setComments([...comments, newCommentObj]);
-      setNewComment('');
+      if (response.success) {
+        // Add the new comment to the list
+        const newCommentObj = response.comment;
+        setComments([...comments, newCommentObj]);
+        setNewComment('');
+      } else {
+        throw new Error(response.message || 'Failed to post comment');
+      }
     } catch (err) {
       console.error('Error posting comment:', err);
-      setError('Failed to post comment. Please try again.');
+      setError(err.message || 'Failed to post comment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

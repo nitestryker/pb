@@ -7,10 +7,11 @@ const Header = () => {
   const { user, logout } = useUser();
   const { toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -32,9 +33,24 @@ const Header = () => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            {/* Notification Bell - Only show if user is logged in */}
+            {user && (
+              <Link to="/notifications" className="relative p-2 rounded hover:bg-blue-700 transition-colors">
+                <i className="fas fa-bell text-lg"></i>
+                {/* Notification badge - show if there are unread notifications */}
+                {user.unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] animate-pulse">
+                    {user.unreadNotifications > 99 ? '99+' : user.unreadNotifications}
+                  </span>
+                )}
+              </Link>
+            )}
+            
+            {/* Theme Toggle */}
             <button onClick={toggleTheme} className="p-2 rounded hover:bg-blue-700">
               <i className="fas fa-moon"></i>
             </button>
+            
             {!user ? (
               <div className="hidden md:flex items-center space-x-2">
                 <Link to="/login" className="flex items-center space-x-2 hover:bg-blue-700 px-3 py-2 rounded">
@@ -53,15 +69,15 @@ const Header = () => {
                   className="flex items-center space-x-2 hover:bg-blue-700 px-3 py-2 rounded"
                 >
                   <img 
-                    src={user.profileImage || `https://www.gravatar.com/avatar/${user.username}?d=mp&s=32`} 
+                    src={user.profile_image || `https://www.gravatar.com/avatar/${user.email || user.username}?d=mp&s=32`} 
                     className="w-8 h-8 rounded-full" 
                     alt="Profile" 
                   />
-                  <span>{user.username}</span>
+                  <span className="hidden md:inline">{user.username}</span>
                   <i className="fas fa-chevron-down ml-1"></i>
                 </button>
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5">
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10">
                     <div className="py-1">
                       {/* Account Group */}
                       <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Account</div>
@@ -114,14 +130,45 @@ const Header = () => {
                 )}
               </div>
             )}
+            
             {/* Mobile menu button */}
             <div className="md:hidden">
-              <button className="p-2 rounded hover:bg-blue-700">
-                <i className="fas fa-bars"></i>
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded hover:bg-blue-700"
+              >
+                <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
               </button>
             </div>
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden py-3 border-t border-blue-700">
+            <Link to="/" className="block px-3 py-2 rounded hover:bg-blue-700">Home</Link>
+            <Link to="/archive" className="block px-3 py-2 rounded hover:bg-blue-700">Archive</Link>
+            {user && (
+              <Link to="/collections" className="block px-3 py-2 rounded hover:bg-blue-700">Collections</Link>
+            )}
+            {!user ? (
+              <>
+                <Link to="/login" className="block px-3 py-2 rounded hover:bg-blue-700">Login</Link>
+                <Link to="/signup" className="block px-3 py-2 rounded hover:bg-blue-700">Sign Up</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/account" className="block px-3 py-2 rounded hover:bg-blue-700">My Account</Link>
+                <button 
+                  onClick={handleLogout}
+                  className="block w-full text-left px-3 py-2 rounded hover:bg-blue-700"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );
