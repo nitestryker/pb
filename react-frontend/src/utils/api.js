@@ -1,100 +1,135 @@
-// API utility functions for making requests to the PHP backend
+// API utility functions with mock data for standalone React app
 
-/**
- * Base API URL - adjust this to match your PHP backend
- * For local development with Vite, we can use a relative URL
- * which will be proxied to the PHP backend
- */
-const API_BASE_URL = '';
-
-/**
- * Make a GET request to the API
- * @param {string} endpoint - The API endpoint to request
- * @param {Object} params - Query parameters to include
- * @returns {Promise<any>} - The response data
- */
-export const apiGet = async (endpoint, params = {}) => {
-  try {
-    // Build URL with query parameters
-    const url = new URL(API_BASE_URL + endpoint, window.location.origin);
-    Object.keys(params).forEach(key => {
-      if (params[key] !== undefined && params[key] !== null) {
-        url.searchParams.append(key, params[key]);
-      }
-    });
-
-    // Make the request
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      credentials: 'include', // Include cookies for session-based auth
-      headers: {
-        'Accept': 'application/json',
-      }
-    });
-
-    // Handle non-2xx responses
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `API error: ${response.status}`);
-    }
-
-    // Parse and return the response data
-    return await response.json();
-  } catch (error) {
-    console.error(`API GET error for ${endpoint}:`, error);
-    throw error;
+// Mock data for pastes
+const mockPastes = [
+  {
+    id: 1,
+    title: 'JavaScript Array Methods',
+    content: 'const arr = [1, 2, 3];\narr.map(x => x * 2); // [2, 4, 6]\narr.filter(x => x > 1); // [2, 3]\narr.reduce((acc, x) => acc + x, 0); // 6',
+    language: 'javascript',
+    created_at: Math.floor(Date.now() / 1000) - 3600,
+    views: 42,
+    username: 'johndoe',
+    tags: 'javascript,arrays,methods',
+    is_public: 1
+  },
+  {
+    id: 2,
+    title: 'Python List Comprehension',
+    content: 'numbers = [1, 2, 3, 4, 5]\n\n# Using list comprehension\nsquares = [x**2 for x in numbers]\nprint(squares)  # [1, 4, 9, 16, 25]\n\n# With conditional\neven_squares = [x**2 for x in numbers if x % 2 == 0]\nprint(even_squares)  # [4, 16]',
+    language: 'python',
+    created_at: Math.floor(Date.now() / 1000) - 7200,
+    views: 28,
+    username: 'pythondev',
+    tags: 'python,list,comprehension',
+    is_public: 1
+  },
+  {
+    id: 3,
+    title: 'React Hooks Example',
+    content: 'import React, { useState, useEffect } from "react";\n\nfunction Counter() {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    document.title = `You clicked ${count} times`;\n  }, [count]);\n\n  return (\n    <div>\n      <p>You clicked {count} times</p>\n      <button onClick={() => setCount(count + 1)}>\n        Click me\n      </button>\n    </div>\n  );\n}',
+    language: 'javascript',
+    created_at: Math.floor(Date.now() / 1000) - 10800,
+    views: 65,
+    username: 'reactfan',
+    tags: 'react,hooks,javascript',
+    is_public: 1
+  },
+  {
+    id: 4,
+    title: 'CSS Flexbox Layout',
+    content: '.container {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  flex-wrap: wrap;\n}\n\n.item {\n  flex: 1 1 200px;\n  margin: 10px;\n  padding: 20px;\n  background-color: #f0f0f0;\n  border-radius: 4px;\n}',
+    language: 'css',
+    created_at: Math.floor(Date.now() / 1000) - 14400,
+    views: 37,
+    username: 'cssmaster',
+    tags: 'css,flexbox,layout',
+    is_public: 1
+  },
+  {
+    id: 5,
+    title: 'PHP PDO Database Connection',
+    content: '<?php\ntry {\n    $db = new PDO(\'sqlite:database.sqlite\');\n    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);\n    \n    $stmt = $db->prepare("SELECT * FROM users WHERE username = ?");\n    $stmt->execute([$username]);\n    $user = $stmt->fetch(PDO::FETCH_ASSOC);\n    \n    echo "User found: " . $user[\'username\'];\n} catch (PDOException $e) {\n    echo "Database error: " . $e->getMessage();\n}',
+    language: 'php',
+    created_at: Math.floor(Date.now() / 1000) - 18000,
+    views: 52,
+    username: 'phpdev',
+    tags: 'php,pdo,database',
+    is_public: 1
   }
-};
+];
 
-/**
- * Make a POST request to the API
- * @param {string} endpoint - The API endpoint to request
- * @param {Object} data - The data to send in the request body
- * @returns {Promise<any>} - The response data
- */
-export const apiPost = async (endpoint, data = {}) => {
-  try {
-    // Convert data to FormData if it's not already
-    let body;
-    let headers = {
-      'Accept': 'application/json',
-    };
-
-    if (data instanceof FormData) {
-      body = data;
-    } else {
-      body = new FormData();
-      Object.keys(data).forEach(key => {
-        if (data[key] !== undefined && data[key] !== null) {
-          if (typeof data[key] === 'boolean') {
-            body.append(key, data[key] ? '1' : '0');
-          } else {
-            body.append(key, data[key]);
-          }
-        }
-      });
-    }
-
-    // Make the request
-    const response = await fetch(API_BASE_URL + endpoint, {
-      method: 'POST',
-      credentials: 'include', // Include cookies for session-based auth
-      headers,
-      body
-    });
-
-    // Handle non-2xx responses
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `API error: ${response.status}`);
-    }
-
-    // Parse and return the response data
-    return await response.json();
-  } catch (error) {
-    console.error(`API POST error for ${endpoint}:`, error);
-    throw error;
+// Mock data for comments
+const mockComments = [
+  {
+    id: 1,
+    paste_id: 1,
+    user_id: 'user123',
+    username: 'pythondev',
+    content: 'Great explanation of array methods!',
+    created_at: Math.floor(Date.now() / 1000) - 1800
+  },
+  {
+    id: 2,
+    paste_id: 1,
+    user_id: 'user456',
+    username: 'reactfan',
+    content: 'You might also want to include the forEach method.',
+    created_at: Math.floor(Date.now() / 1000) - 900
+  },
+  {
+    id: 3,
+    paste_id: 2,
+    user_id: 'user789',
+    username: 'johndoe',
+    content: 'List comprehensions are one of my favorite Python features!',
+    created_at: Math.floor(Date.now() / 1000) - 2700
   }
+];
+
+// Mock data for collections
+const mockCollections = [
+  {
+    id: 1,
+    name: 'JavaScript Snippets',
+    description: 'Useful JavaScript code snippets and examples',
+    user_id: 'user123',
+    is_public: 1,
+    created_at: Math.floor(Date.now() / 1000) - 86400,
+    updated_at: Math.floor(Date.now() / 1000) - 3600,
+    paste_count: 3
+  },
+  {
+    id: 2,
+    name: 'CSS Tricks',
+    description: 'Helpful CSS techniques and layouts',
+    user_id: 'user123',
+    is_public: 1,
+    created_at: Math.floor(Date.now() / 1000) - 172800,
+    updated_at: Math.floor(Date.now() / 1000) - 7200,
+    paste_count: 2
+  },
+  {
+    id: 3,
+    name: 'Private Notes',
+    description: 'Personal code snippets and notes',
+    user_id: 'user123',
+    is_public: 0,
+    created_at: Math.floor(Date.now() / 1000) - 259200,
+    updated_at: Math.floor(Date.now() / 1000) - 14400,
+    paste_count: 5
+  }
+];
+
+// Mock user data
+const mockUser = {
+  id: 'user123',
+  username: 'johndoe',
+  email: 'john@example.com',
+  profile_image: null,
+  created_at: Math.floor(Date.now() / 1000) - 2592000, // 30 days ago
+  role: 'free',
+  unreadNotifications: 2
 };
 
 /**
@@ -102,13 +137,8 @@ export const apiPost = async (endpoint, data = {}) => {
  * @returns {Promise<Object>} - The user data if authenticated
  */
 export const checkAuth = async () => {
-  try {
-    const response = await apiGet('/?check_auth=1');
-    return response.user || null;
-  } catch (error) {
-    console.error('Auth check failed:', error);
-    return null;
-  }
+  // For standalone mode, return mock user data
+  return Promise.resolve(mockUser);
 };
 
 /**
@@ -117,14 +147,18 @@ export const checkAuth = async () => {
  * @returns {Promise<Object>} - The user data
  */
 export const login = async (credentials) => {
-  const formData = new FormData();
-  formData.append('login', '1');
-  Object.keys(credentials).forEach(key => {
-    formData.append(key, credentials[key]);
-  });
-
-  const response = await apiPost('/', formData);
-  return response;
+  // Simulate login validation
+  if (credentials.username === 'johndoe' && credentials.password === 'password') {
+    return {
+      success: true,
+      user: mockUser
+    };
+  }
+  
+  return {
+    success: false,
+    message: 'Invalid username or password'
+  };
 };
 
 /**
@@ -133,14 +167,25 @@ export const login = async (credentials) => {
  * @returns {Promise<Object>} - The user data
  */
 export const register = async (userData) => {
-  const formData = new FormData();
-  formData.append('register', '1');
-  Object.keys(userData).forEach(key => {
-    formData.append(key, userData[key]);
-  });
-
-  const response = await apiPost('/', formData);
-  return response;
+  // Simulate registration
+  if (userData.username === 'johndoe') {
+    return {
+      success: false,
+      message: 'Username already taken'
+    };
+  }
+  
+  return {
+    success: true,
+    user: {
+      id: 'new_user_' + Date.now(),
+      username: userData.username,
+      email: userData.email,
+      created_at: Math.floor(Date.now() / 1000),
+      role: 'free',
+      unreadNotifications: 0
+    }
+  };
 };
 
 /**
@@ -148,7 +193,8 @@ export const register = async (userData) => {
  * @returns {Promise<void>}
  */
 export const logout = async () => {
-  await apiGet('/?logout=1');
+  // Simulate logout
+  return Promise.resolve();
 };
 
 /**
@@ -157,20 +203,25 @@ export const logout = async () => {
  * @returns {Promise<Object>} - The created paste
  */
 export const createPaste = async (pasteData) => {
-  const formData = new FormData();
-  formData.append('create_paste', '1');
-  Object.keys(pasteData).forEach(key => {
-    if (pasteData[key] !== undefined && pasteData[key] !== null) {
-      if (typeof pasteData[key] === 'boolean') {
-        formData.append(key, pasteData[key] ? '1' : '0');
-      } else {
-        formData.append(key, pasteData[key]);
-      }
-    }
-  });
-
-  const response = await apiPost('/', formData);
-  return response;
+  // Simulate paste creation
+  const newPaste = {
+    id: mockPastes.length + 1,
+    title: pasteData.title || 'Untitled',
+    content: pasteData.content,
+    language: pasteData.language || 'plaintext',
+    created_at: Math.floor(Date.now() / 1000),
+    views: 0,
+    username: mockUser.username,
+    tags: pasteData.tags || '',
+    is_public: pasteData.is_public ? 1 : 0
+  };
+  
+  mockPastes.unshift(newPaste);
+  
+  return {
+    success: true,
+    paste_id: newPaste.id
+  };
 };
 
 /**
@@ -179,7 +230,23 @@ export const createPaste = async (pasteData) => {
  * @returns {Promise<Object>} - The paste data
  */
 export const getPaste = async (id) => {
-  return await apiGet('/', { id });
+  // Find paste in mock data
+  const paste = mockPastes.find(p => p.id.toString() === id.toString());
+  
+  if (!paste) {
+    return {
+      success: false,
+      message: 'Paste not found'
+    };
+  }
+  
+  // Increment view count
+  paste.views += 1;
+  
+  return {
+    success: true,
+    paste
+  };
 };
 
 /**
@@ -188,7 +255,16 @@ export const getPaste = async (id) => {
  * @returns {Promise<Array>} - The pastes
  */
 export const getRecentPastes = async (limit = 5) => {
-  return await apiGet('/', { recent: '1', limit });
+  // Sort by created_at and take the most recent
+  const recentPastes = [...mockPastes]
+    .filter(p => p.is_public)
+    .sort((a, b) => b.created_at - a.created_at)
+    .slice(0, limit);
+  
+  return {
+    success: true,
+    pastes: recentPastes
+  };
 };
 
 /**
@@ -197,7 +273,57 @@ export const getRecentPastes = async (limit = 5) => {
  * @returns {Promise<Object>} - The pastes and pagination data
  */
 export const getArchivePastes = async (params = {}) => {
-  return await apiGet('/', { page: 'archive', ...params });
+  const page = parseInt(params.p) || 1;
+  const limit = 10;
+  const language = params.language || '';
+  const tag = params.tag || '';
+  const search = params.search || '';
+  const sort = params.sort || 'date';
+  const order = params.order || 'desc';
+  
+  // Filter pastes
+  let filteredPastes = [...mockPastes].filter(p => p.is_public);
+  
+  if (language) {
+    filteredPastes = filteredPastes.filter(p => p.language === language);
+  }
+  
+  if (tag) {
+    filteredPastes = filteredPastes.filter(p => p.tags && p.tags.includes(tag));
+  }
+  
+  if (search) {
+    const searchLower = search.toLowerCase();
+    filteredPastes = filteredPastes.filter(p => 
+      (p.title && p.title.toLowerCase().includes(searchLower)) || 
+      (p.content && p.content.toLowerCase().includes(searchLower))
+    );
+  }
+  
+  // Sort pastes
+  filteredPastes.sort((a, b) => {
+    const aValue = sort === 'views' ? a.views : a.created_at;
+    const bValue = sort === 'views' ? b.views : b.created_at;
+    
+    return order === 'asc' ? aValue - bValue : bValue - aValue;
+  });
+  
+  // Paginate
+  const total = filteredPastes.length;
+  const totalPages = Math.ceil(total / limit);
+  const offset = (page - 1) * limit;
+  const paginatedPastes = filteredPastes.slice(offset, offset + limit);
+  
+  return {
+    success: true,
+    pastes: paginatedPastes,
+    pagination: {
+      current_page: page,
+      total_pages: totalPages,
+      total_items: total,
+      items_per_page: limit
+    }
+  };
 };
 
 /**
@@ -207,13 +333,22 @@ export const getArchivePastes = async (params = {}) => {
  * @returns {Promise<Object>} - The created comment
  */
 export const addComment = async (pasteId, content) => {
-  const formData = new FormData();
-  formData.append('add_comment', '1');
-  formData.append('paste_id', pasteId);
-  formData.append('content', content);
-
-  const response = await apiPost('/', formData);
-  return response;
+  // Create new comment
+  const newComment = {
+    id: mockComments.length + 1,
+    paste_id: parseInt(pasteId),
+    user_id: mockUser.id,
+    username: mockUser.username,
+    content,
+    created_at: Math.floor(Date.now() / 1000)
+  };
+  
+  mockComments.push(newComment);
+  
+  return {
+    success: true,
+    comment: newComment
+  };
 };
 
 /**
@@ -222,7 +357,13 @@ export const addComment = async (pasteId, content) => {
  * @returns {Promise<Array>} - The comments
  */
 export const getComments = async (pasteId) => {
-  return await apiGet('/', { id: pasteId, comments: '1' });
+  // Filter comments for this paste
+  const pasteComments = mockComments.filter(c => c.paste_id.toString() === pasteId.toString());
+  
+  return {
+    success: true,
+    comments: pasteComments
+  };
 };
 
 /**
@@ -231,7 +372,41 @@ export const getComments = async (pasteId) => {
  * @returns {Promise<Array>} - The related pastes
  */
 export const getRelatedPastes = async (pasteId) => {
-  return await apiGet('/', { id: pasteId, related: '1' });
+  // Find the current paste
+  const currentPaste = mockPastes.find(p => p.id.toString() === pasteId.toString());
+  
+  if (!currentPaste) {
+    return {
+      success: false,
+      message: 'Paste not found'
+    };
+  }
+  
+  // Find pastes with the same language or tags
+  let relatedPastes = mockPastes.filter(p => 
+    p.id !== currentPaste.id && 
+    p.is_public && 
+    (p.language === currentPaste.language || 
+     (p.tags && currentPaste.tags && p.tags.split(',').some(tag => 
+       currentPaste.tags.split(',').includes(tag.trim())
+     ))
+    )
+  );
+  
+  // Sort by relevance (same language is more relevant)
+  relatedPastes.sort((a, b) => {
+    const aRelevance = a.language === currentPaste.language ? 2 : 1;
+    const bRelevance = b.language === currentPaste.language ? 2 : 1;
+    return bRelevance - aRelevance;
+  });
+  
+  // Limit to 5 pastes
+  relatedPastes = relatedPastes.slice(0, 5);
+  
+  return {
+    success: true,
+    related_pastes: relatedPastes
+  };
 };
 
 /**
@@ -239,7 +414,10 @@ export const getRelatedPastes = async (pasteId) => {
  * @returns {Promise<Array>} - The user's collections
  */
 export const getUserCollections = async () => {
-  return await apiGet('/', { page: 'collections' });
+  return {
+    success: true,
+    collections: mockCollections
+  };
 };
 
 /**
@@ -248,18 +426,24 @@ export const getUserCollections = async () => {
  * @returns {Promise<Object>} - The created collection
  */
 export const createCollection = async (collectionData) => {
-  const formData = new FormData();
-  formData.append('create_collection', '1');
-  Object.keys(collectionData).forEach(key => {
-    if (typeof collectionData[key] === 'boolean') {
-      formData.append(key, collectionData[key] ? '1' : '0');
-    } else {
-      formData.append(key, collectionData[key]);
-    }
-  });
-
-  const response = await apiPost('/', formData);
-  return response;
+  // Create new collection
+  const newCollection = {
+    id: mockCollections.length + 1,
+    name: collectionData.name,
+    description: collectionData.description || '',
+    user_id: mockUser.id,
+    is_public: collectionData.is_public ? 1 : 0,
+    created_at: Math.floor(Date.now() / 1000),
+    updated_at: Math.floor(Date.now() / 1000),
+    paste_count: 0
+  };
+  
+  mockCollections.push(newCollection);
+  
+  return {
+    success: true,
+    collection: newCollection
+  };
 };
 
 /**
@@ -267,7 +451,31 @@ export const createCollection = async (collectionData) => {
  * @returns {Promise<Object>} - The user account data
  */
 export const getUserAccount = async () => {
-  return await apiGet('/', { page: 'account' });
+  // Get user stats
+  const stats = {
+    totalPastes: mockPastes.filter(p => p.username === mockUser.username).length,
+    publicPastes: mockPastes.filter(p => p.username === mockUser.username && p.is_public).length,
+    totalViews: mockPastes.filter(p => p.username === mockUser.username).reduce((sum, p) => sum + p.views, 0),
+    collections: mockCollections.length,
+    following: 5,
+    followers: 8
+  };
+  
+  // Get recent pastes
+  const recentPastes = mockPastes
+    .filter(p => p.username === mockUser.username)
+    .sort((a, b) => b.created_at - a.created_at)
+    .slice(0, 5);
+  
+  return {
+    success: true,
+    user: {
+      ...mockUser,
+      top_language: 'JavaScript'
+    },
+    stats,
+    recent_pastes: recentPastes
+  };
 };
 
 /**
@@ -277,17 +485,9 @@ export const getUserAccount = async () => {
  * @returns {Promise<Object>} - The updated settings
  */
 export const updateUserSettings = async (settingType, settingsData) => {
-  const formData = new FormData();
-  formData.append('update_settings', '1');
-  formData.append('setting_type', settingType);
-  Object.keys(settingsData).forEach(key => {
-    if (typeof settingsData[key] === 'boolean') {
-      formData.append(key, settingsData[key] ? '1' : '0');
-    } else {
-      formData.append(key, settingsData[key]);
-    }
-  });
-
-  const response = await apiPost('/', formData);
-  return response;
+  // Simulate settings update
+  return {
+    success: true,
+    message: `${settingType} settings updated successfully`
+  };
 };

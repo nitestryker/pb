@@ -4,13 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Remove the proxy configuration to run without PHP backend
   server: {
-    proxy: {
-      // Proxy API requests to the PHP backend
-      '/': {
-        target: 'http://localhost:8000', // Adjust this to your PHP server URL
-        changeOrigin: true,
-      }
-    }
+    port: 5173
   }
 })
