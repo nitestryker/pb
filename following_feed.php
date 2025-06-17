@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 
@@ -97,7 +96,7 @@ $theme = $_COOKIE['theme'] ?? 'dark';
             </h1>
 
             <?php if (empty($feed_pastes)): ?>
-                <div class="text-center py-12">
+                <div class="text-center py-8">
                     <i class="fas fa-rss text-4xl text-gray-400 mb-4"></i>
                     <p class="text-gray-500 text-lg mb-4">Your feed is empty.</p>
                     <?php if ($following_count === 0): ?>
@@ -138,7 +137,7 @@ $theme = $_COOKIE['theme'] ?? 'dark';
                                         <?= htmlspecialchars($paste['title']) ?>
                                     </a>
                                 </h3>
-                                <div class="bg-gray-100 dark:bg-gray-800 rounded p-3 font-mono text-sm overflow-hidden">
+                                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg mb-3 font-mono text-sm overflow-hidden">
                                     <?= htmlspecialchars(substr($paste['content'], 0, 200)) ?><?= strlen($paste['content']) > 200 ? '...' : '' ?>
                                 </div>
                             </div>
