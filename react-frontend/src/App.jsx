@@ -11,6 +11,9 @@ import AccountPage from './pages/AccountPage'
 import SettingsPage from './pages/SettingsPage'
 import CollectionsPage from './pages/CollectionsPage'
 import NotificationsPage from './pages/NotificationsPage'
+import MessagesPage from './pages/MessagesPage'
+import ProfilePage from './pages/ProfilePage'
+import EditProfilePage from './pages/EditProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
 import { UserProvider, useUser } from './contexts/UserContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -64,6 +67,17 @@ function App() {
                 <Route path="/collections" element={
                   <ProtectedRoute>
                     <CollectionsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/messages" element={
+                  <ProtectedRoute>
+                    <MessagesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile/:username" element={<ProfilePage />} />
+                <Route path="/profile/edit" element={
+                  <ProtectedRoute>
+                    <EditProfilePage />
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFoundPage />} />

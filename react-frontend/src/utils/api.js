@@ -174,6 +174,32 @@ const mockUser = {
   unreadNotifications: 2
 };
 
+// Mock profile data
+const mockProfiles = {
+  'johndoe': {
+    id: 'user123',
+    username: 'johndoe',
+    email: 'john@example.com',
+    profile_image: null,
+    website: 'https://johndoe.com',
+    tagline: 'Full-stack developer and code enthusiast',
+    created_at: Math.floor(Date.now() / 1000) - 2592000,
+    role: 'free',
+    show_paste_count: true
+  },
+  'pythondev': {
+    id: 'user456',
+    username: 'pythondev',
+    email: 'python@example.com',
+    profile_image: null,
+    website: 'https://pythonrocks.com',
+    tagline: 'Python developer and data science enthusiast',
+    created_at: Math.floor(Date.now() / 1000) - 5184000,
+    role: 'premium',
+    show_paste_count: true
+  }
+};
+
 /**
  * Check if the user is authenticated
  * @returns {Promise<Object>} - The user data if authenticated
@@ -580,5 +606,46 @@ export const deleteNotification = async (notificationId, notificationType) => {
   
   return {
     success: true
+  };
+};
+
+/**
+ * Get user profile
+ * @param {string} username - The username
+ * @returns {Promise<Object>} - The user profile
+ */
+export const getUserProfile = async (username) => {
+  // Find profile in mock data
+  const profile = mockProfiles[username];
+  
+  if (!profile) {
+    return {
+      success: false,
+      message: 'User not found'
+    };
+  }
+  
+  // Get user's public pastes
+  const pastes = mockPastes
+    .filter(p => p.username === username && p.is_public)
+    .sort((a, b) => b.created_at - a.created_at);
+  
+  return {
+    success: true,
+    profile,
+    pastes
+  };
+};
+
+/**
+ * Update user profile
+ * @param {FormData} formData - The profile data
+ * @returns {Promise<Object>} - The result
+ */
+export const updateUserProfile = async (formData) => {
+  // Simulate profile update
+  return {
+    success: true,
+    message: 'Profile updated successfully'
   };
 };
