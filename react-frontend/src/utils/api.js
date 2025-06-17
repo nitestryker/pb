@@ -121,6 +121,48 @@ const mockCollections = [
   }
 ];
 
+// Mock notifications data
+const mockNotifications = [
+  {
+    id: 1,
+    notification_type: 'comment',
+    user_id: 'user123',
+    paste_id: 1,
+    paste_title: 'JavaScript Array Methods',
+    comment_id: 2,
+    type: 'comment',
+    message: 'reactfan commented on your paste',
+    created_at: Math.floor(Date.now() / 1000) - 900,
+    is_read: 0,
+    username: 'reactfan',
+    related_content: 'You might also want to include the forEach method.'
+  },
+  {
+    id: 2,
+    notification_type: 'message',
+    user_id: 'user123',
+    message_id: 1,
+    type: 'new_message',
+    message: 'You have a new message from pythondev',
+    created_at: Math.floor(Date.now() / 1000) - 1800,
+    is_read: 0,
+    username: 'pythondev',
+    related_content: 'Hey, I really liked your JavaScript array methods paste. Would you be interested in collaborating on a project?'
+  },
+  {
+    id: 3,
+    notification_type: 'expiration',
+    user_id: 'user123',
+    paste_id: 3,
+    paste_title: 'React Hooks Example',
+    expires_at: Math.floor(Date.now() / 1000) + 86400,
+    reminder_type: '1_day',
+    message: 'Your paste "React Hooks Example" will expire in 1 day — renew it?',
+    created_at: Math.floor(Date.now() / 1000) - 3600,
+    is_read: 1
+  }
+];
+
 // Mock user data
 const mockUser = {
   id: 'user123',
@@ -489,5 +531,54 @@ export const updateUserSettings = async (settingType, settingsData) => {
   return {
     success: true,
     message: `${settingType} settings updated successfully`
+  };
+};
+
+/**
+ * Get user notifications
+ * @returns {Promise<Object>} - The notifications
+ */
+export const getNotifications = async () => {
+  return {
+    success: true,
+    notifications: mockNotifications
+  };
+};
+
+/**
+ * Mark a notification as read
+ * @param {number} notificationId - The notification ID
+ * @param {string} notificationType - The notification type
+ * @returns {Promise<Object>} - The result
+ */
+export const markNotificationAsRead = async (notificationId, notificationType) => {
+  // Simulate marking notification as read
+  const notification = mockNotifications.find(n => n.id === notificationId);
+  
+  if (notification) {
+    notification.is_read = 1;
+  }
+  
+  return {
+    success: true
+  };
+};
+
+/**
+ * Delete a notification
+ * @param {number} notificationId - The notification ID
+ * @param {string} notificationType - The notification type
+ * @returns {Promise<Object>} - The result
+ */
+export const deleteNotification = async (notificationId, notificationType) => {
+  // Simulate deleting notification
+  const index = mockNotifications.findIndex(n => n.id === notificationId);
+  
+  if (index !== -1) {
+    mockNotifications.splice(index, 1);
+  }
+  
+  return {
+    success: true
   };
 };

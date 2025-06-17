@@ -10,6 +10,7 @@ import SignupPage from './pages/SignupPage'
 import AccountPage from './pages/AccountPage'
 import SettingsPage from './pages/SettingsPage'
 import CollectionsPage from './pages/CollectionsPage'
+import NotificationsPage from './pages/NotificationsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { UserProvider, useUser } from './contexts/UserContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -45,6 +46,11 @@ function App() {
                 <Route path="/view/:id" element={<ViewPastePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/notifications" element={
+                  <ProtectedRoute>
+                    <NotificationsPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/account" element={
                   <ProtectedRoute>
                     <AccountPage />
