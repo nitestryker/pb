@@ -15,6 +15,9 @@ import MessagesPage from './pages/MessagesPage'
 import ProfilePage from './pages/ProfilePage'
 import EditProfilePage from './pages/EditProfilePage'
 import PricingPage from './pages/PricingPage'
+import ProjectsPage from './pages/ProjectsPage'
+import FollowingPage from './pages/FollowingPage'
+import ImportExportPage from './pages/ImportExportPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { UserProvider, useUser } from './contexts/UserContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -82,6 +85,21 @@ function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/projects" element={
+                  <ProtectedRoute>
+                    <ProjectsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/following" element={
+                  <ProtectedRoute>
+                    <FollowingPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/import-export" element={
+                  <ProtectedRoute>
+                    <ImportExportPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </main>
