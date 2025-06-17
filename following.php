@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+require_once 'maintenance_check.php';
 require_once 'database.php';
 require_once 'audit_logger.php';
 
@@ -13,25 +15,6 @@ if (!$user_id) {
 
 $db = Database::getInstance()->getConnection();
 $audit_logger = new AuditLogger();
-
-// Create user_follows table if it doesn't exist
-$db->exec("CREATE TABLE IF NOT EXISTS user_follows (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    follower_id TEXT NOT NULL,
-    following_id TEXT NOT NULL,
-    created_at INTEGER DEFAULT (strftime('%s', 'now')),
-    FOREIGN KEY(follower_id) REFERENCES users(id),
-    FOREIGN KEY(following_id) REFERENCES users(id),
-    UNIQUE(follower_id, following_id)
-)");
-
-// Add follower/following counts to users table if they don't exist
-try {
-    $db->exec("ALTER TABLE users ADD COLUMN followers_count INTEGER DEFAULT 0");
-    $db->exec("ALTER TABLE users ADD COLUMN following_count INTEGER DEFAULT 0");
-} catch (PDOException $e) {
-    // Columns might already exist
-}
 
 // Handle follow/unfollow actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -272,7 +255,7 @@ $theme = $_COOKIE['theme'] ?? 'dark';
                                   <a href="/following.php" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 bg-blue-100 dark:bg-blue-900">
                                     <i class="fas fa-users mr-2"></i> Following
                                   </a>
-                                  <a href="/import-export.php" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                  <a href="/?page=import-export" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                                     <i class="fas fa-exchange-alt mr-2"></i> Import/Export
                                   </a>
 

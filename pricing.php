@@ -1,3 +1,4 @@
+
 <?php
 // Only start session if not already started (for standalone access)
 if (session_status() === PHP_SESSION_NONE) {
@@ -261,7 +262,7 @@ if (!$is_included): ?>
     <div class="flex items-center justify-center">
         <i class="fas fa-info-circle text-blue-500 mr-3"></i>
         <span class="text-blue-800 dark:text-blue-200 text-sm">
-            This is a development environment web interface preview. In production, you would be redirected to a payment processor.
+            This is a development environment web interface preview. Pro, gradebook, you would be redirected to a payment processor.
         </span>
     </div>
 </div>
