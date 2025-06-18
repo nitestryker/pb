@@ -14,6 +14,7 @@ export const UserProvider = ({ children }) => {
     // Check if user is authenticated on initial load
     const fetchUser = async () => {
       try {
+        setLoading(true);
         const userData = await checkAuth();
         setUser(userData);
       } catch (error) {
